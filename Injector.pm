@@ -23,7 +23,7 @@ class Injector {
 				}
 			}
 		}
-		add-instance: $obj;
+		$.add-instance($obj);
 		$obj
 	}
 }
