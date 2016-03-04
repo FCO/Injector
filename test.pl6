@@ -1,22 +1,12 @@
 use Injector;
+use Test;
 
-class Ble {...}
-class Bli {...}
-class Blo {...}
-class Blu {...}
-class Bla {
-	has Ble $.ble is injected;
+plan 6;
+
+role RolePla {
 }
 
-class Ble {
-	has Int $.answer	is injected;
-	has Str $.string	is injected;
-	has Bli $.bli		is injected;
-	has Blo $.blo		is injected;
-}
-
-class Bli {
-	method Str {"tested!"}
+class Ple does RolePla {
 }
 
 class Blo {
@@ -27,14 +17,35 @@ class Blu is Blo {
 	has $.type = "Blu";
 }
 
+class Bli {
+	method Str {"tested!"}
+}
+
+class Ble {
+	has Int $.answer	is injected;
+	has Str $.string	is injected;
+	has Bli $.bli		is injected;
+	has Blo $.blo		is injected;
+	has RolePla $.pla	is injected;
+}
+
+class Bla {
+	has Ble $.ble is injected;
+}
+
+my $q = Ple.new;
+say $q.^name;
+
+Injector.add-instance($q);
 Injector.add-instance(42);
 Injector.add-instance("testing injector");
 Injector.add-instance(Blu.new);
 
 my Bla $obj = Injector.instanciate(Bla);
 
-say "obj.ble.answer == {$obj.ble.answer}";
-say "obj.ble.string == {$obj.ble.string}";
-say "obj.ble.bli == {$obj.ble.bli}";
-say "obj.ble.blo.pi == {$obj.ble.blo.pi}";
-say "obj.ble.blo.type == {$obj.ble.blo.type}";
+is $obj.ble.answer,	42,			"Injected a Int";
+is $obj.ble.string,	"testing injector",	"Injected a Str";
+is "{$obj.ble.bli}",	"tested!",		"Injected a Custom obj";
+is $obj.ble.blo.pi,	3.14,			"Injected a Custom Object inherietd";
+is $obj.ble.blo.type,	"Blu",			"Using the right obj";
+is $obj.ble.pla.^name,	"Ple",			"Using a Object as its role";
