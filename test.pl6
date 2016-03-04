@@ -34,7 +34,6 @@ class Bla {
 }
 
 my $q = Ple.new;
-say $q.^name;
 
 Injector.add-instance($q);
 Injector.add-instance(42);
