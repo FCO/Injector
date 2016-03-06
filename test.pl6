@@ -33,9 +33,7 @@ class Bla {
 	has Ble $.ble is injected;
 }
 
-my $q = Ple.new;
-
-Injector.add-instance($q);
+Injector.add-instance(Ple.new);
 Injector.add-instance(42);
 Injector.add-instance("testing injector");
 Injector.add-instance(Blu.new);
