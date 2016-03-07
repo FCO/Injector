@@ -33,12 +33,17 @@ class Bla {
 	has Ble $.ble is injected;
 }
 
-Injector.add-instance(Ple.new);
-Injector.add-instance(42);
-Injector.add-instance("testing injector");
-Injector.add-instance(Blu.new);
+bind(Int).to(42);
+bind(Str).to("testing injector");
+bind(Blo).to(Blu.new);
+#bind(RolePla).to(Ple.new);
 
-my Bla $obj = Injector.instanciate(Bla);
+#Injector.add-instance(Ple.new);
+#Injector.add-instance(42);
+#Injector.add-instance("testing injector");
+#Injector.add-instance(Blu.new);
+
+my Bla $obj = BindStorage.get-obj(:type(Bla));
 
 is $obj.ble.answer,	42,			"Injected a Int";
 is $obj.ble.string,	"testing injector",	"Injected a Str";

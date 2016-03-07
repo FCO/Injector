@@ -59,11 +59,11 @@ class BindStorage {
 
 	method add-obj(Mu:D $obj) {
 		%binds{$obj.type}{$obj.name.defined ?? $obj.name !! ""}.push($obj);
-		%binds{$obj.type}{"*"}.push($obj)
 	}
 
-	method get-obj(Mu:U :$type = Mu, Str :$name) {
+	method get-obj(Mu:U :$type = Mu, Str :$name is copy) {
 		my Mu:U @types;
+		$name = "" unless $name.defined;
 
 		for %binds.keys -> $t {
 			if $type === $t {
@@ -72,14 +72,7 @@ class BindStorage {
 				@types.push($t)
 			}
 		}
-		if @types and not $name.defined {
-			if %binds{@types[0]}{""}:exists {
-				for @(%binds{@types[0]}{""}) -> Binder $bind {
-					my $obj = $bind.get-obj;
-					return $obj if $obj ~~ $type
-				}
-			}
-		} elsif @types > 0 {
+		if @types {
 			for @types -> $t {
 				if %binds{$t}{$name}:exists {
 					for @(%binds{$t}{$name}) -> Binder $bind {

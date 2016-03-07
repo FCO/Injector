@@ -1,38 +1,52 @@
 use Binder;
+
+class Injector{...}
+
+my $instanciator = -> $obj {
+	Injector.inject-on($obj.get-obj)
+};
+
+sub bind(Mu:U $type) is export {
+	#Binder[$type].new
+	Binder[$type, :$instanciator].new
+}
+
 class Injector {
 	my Hash $attrs = {};
 	my SetHash $instances .= new;
+
 	method add-attribute(Attribute $attr) {
 		$attrs.push($attr.package.^name => $attr);
 	}
 	method add-instance($obj) {
 		$instances{$obj} = True;
 	}
-	method instanciate(::Type) {
+	method inject-on($obj) {
+		my $type = $obj.WHAT;
 		my %bless-data;
 
 		for $instances.keys -> \instance {
-			if instance ~~ Type {
+			if instance ~~ $type {
 				return instance
 			}
 		}
 
-		if $attrs{Type.^name}:exists {
-			for @( $attrs{Type.^name} ) -> Attribute $attr {
+		if $attrs{$type.^name}:exists {
+			for @( $attrs{$type.^name} ) -> Attribute $attr {
 				for $instances.keys -> \instance {
 					if instance ~~ $attr.type {
-						%bless-data{$attr.name.substr(2)} = instance;
+						$?CLASS.set_value($obj, instance);
 						last
 					}
 				}
 				if not %bless-data{$attr.name}:exists {
-					%bless-data{$attr.name.substr(2)} = $.instanciate($attr.type);
+					my $type = $attr.type;
+					$?CLASS.set_value($obj, BindStorage.get-obj(:$type));
 				}
 			}
 		}
-		my \obj = Type.bless(|%bless-data);
-		$.add-instance(obj);
-		obj
+		$.add-instance($obj);
+		$obj
 	}
 }
 
