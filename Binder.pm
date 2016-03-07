@@ -2,13 +2,13 @@ enum Lifecicle<singleton instanciation>;
 
 class BindStorage{...}
 
-role Binder[::Type = Mu] {
+role Binder[::Type = Mu, Callable :$instanciator] {
 
 	has Mu:U	$.type		is rw	= Type;
 	has Mu:U	$.to-type	is rw	= Type;
 	has Str		$.name		is rw;
 	has 		$.instance	is rw;
-	has Callable	$.instanciator	is rw	= -> $obj {$obj.to-type.new(|$obj.pos-args, |$obj.named-args)};
+	has Callable	$.instanciator	is rw	= $instanciator // -> $obj {$obj.to-type.new(|$obj.pos-args, |$obj.named-args)};
 	has Lifecicle	$.lifecicle	is rw	= singleton;
 	has		@.pos-args	is rw;
 	has		%.named-args	is rw;
@@ -36,17 +36,16 @@ role Binder[::Type = Mu] {
 		self
 	}
 
-	multi method to(Binder:D: Callable $!instanciator, *@!pos-args, *%named-args) {
-		BindStorage.add-obj(self)
+	proto method to(Binder:D: |) {
+		{*};
+		BindStorage.add-obj(self);
 	}
 
-	multi method to(Binder:D: Mu:U $!to-type, *@!pos-args, *%named-args) {
-		BindStorage.add-obj(self)
-	}
+	multi method to(Binder:D: Callable $!instanciator, *@!pos-args, *%named-args) {}
 
-	multi method to(Binder:D: Mu:D $!instance) {
-		BindStorage.add-obj(self)
-	}
+	multi method to(Binder:D: Mu:U $!to-type, *@!pos-args, *%named-args) {}
+
+	multi method to(Binder:D: Mu:D $!instance) {}
 }
 
 class BindStorage {
@@ -74,10 +73,20 @@ class BindStorage {
 			}
 		}
 		if @types and not $name.defined {
-			return %binds{@types[0]}{""}[0].get-obj if %binds{@types[0]}{""}[0]:exists
-		} elsif @types {
+			if %binds{@types[0]}{""}:exists {
+				for @(%binds{@types[0]}{""}) -> Binder $bind {
+					my $obj = $bind.get-obj;
+					return $obj if $obj ~~ $type
+				}
+			}
+		} elsif @types > 0 {
 			for @types -> $t {
-				return %binds{$t}{$name}[0].get-obj if %binds{$t}{$name}[0]:exists
+				if %binds{$t}{$name}:exists {
+					for @(%binds{$t}{$name}) -> Binder $bind {
+						my $obj = $bind.get-obj;
+						return $obj if $obj ~~ $type
+					}
+				}
 			}
 		}
 	}
