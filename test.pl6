@@ -10,6 +10,7 @@ class Ple does RolePla {
 }
 
 class Blo {
+	method gist{"Blo"}
 	method pi { 3.14 }
 }
 
@@ -43,7 +44,9 @@ bind(Blo).to(Blu.new);
 #Injector.add-instance("testing injector");
 #Injector.add-instance(Blu.new);
 
-my Bla $obj = BindStorage.get-obj(:type(Bla));
+#BindStorage.dd;
+my $obj = Injector.inject-on: BindStorage.get-obj(:type(Bla));
+$obj.perl.say;
 
 is $obj.ble.answer,	42,			"Injected a Int";
 is $obj.ble.string,	"testing injector",	"Injected a Str";

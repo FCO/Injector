@@ -18,20 +18,12 @@ class Injector {
 	method add-attribute(Attribute $attr) {
 		$attrs.push($attr.package.^name => $attr);
 	}
-	method add-instance($obj) {
-		$instances{$obj} = True;
-	}
 	method inject-on($obj) {
+		note "inject-on";
 		my $type = $obj.WHAT;
 		my %bless-data;
 
-		for $instances.keys -> \instance {
-			if instance ~~ $type {
-				return instance
-			}
-		}
-
-		if $attrs{$type.^name}:exists {
+		if BindStorage.exists($type) {
 			for @( $attrs{$type.^name} ) -> Attribute $attr {
 				for $instances.keys -> \instance {
 					if instance ~~ $attr.type {
@@ -45,7 +37,7 @@ class Injector {
 				}
 			}
 		}
-		$.add-instance($obj);
+		#$.add-instance($obj);
 		$obj
 	}
 }

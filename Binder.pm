@@ -41,11 +41,17 @@ role Binder[::Type = Mu, Callable :$instanciator] {
 		BindStorage.add-obj(self);
 	}
 
-	multi method to(Binder:D: Callable $!instanciator, *@!pos-args, *%named-args) {}
+	multi method to(Binder:D: Callable $!instanciator, *@!pos-args, *%named-args) {
+		BindStorage.add-obj(self);
+	}
 
-	multi method to(Binder:D: Mu:U $!to-type, *@!pos-args, *%named-args) {}
+	multi method to(Binder:D: Mu:U $!to-type, *@!pos-args, *%named-args) {
+		BindStorage.add-obj(self);
+	}
 
-	multi method to(Binder:D: Mu:D $!instance) {}
+	multi method to(Binder:D: Mu:D $!instance) {
+		BindStorage.add-obj(self);
+	}
 }
 
 class BindStorage {
@@ -58,12 +64,15 @@ class BindStorage {
 	}
 
 	method add-obj(Mu:D $obj) {
-		%binds{$obj.type}{$obj.name.defined ?? $obj.name !! ""}.push($obj);
+		%binds{$obj.type}.push: $obj.name // "" => $obj;
 	}
 
-	method get-obj(Mu:U :$type = Mu, Str :$name is copy) {
+	method exists(Mu:U $type) {
+		%binds{$type}:exists
+	}
+
+	method get-obj(Mu:U :$type = Mu, Str :$name = "") {
 		my Mu:U @types;
-		$name = "" unless $name.defined;
 
 		for %binds.keys -> $t {
 			if $type === $t {
@@ -74,6 +83,7 @@ class BindStorage {
 		}
 		if @types {
 			for @types -> $t {
+				note "%binds\{$t}\{$name}:exists";
 				if %binds{$t}{$name}:exists {
 					for @(%binds{$t}{$name}) -> Binder $bind {
 						my $obj = $bind.get-obj;
@@ -82,5 +92,6 @@ class BindStorage {
 				}
 			}
 		}
+		$type.new
 	}
 }
