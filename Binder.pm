@@ -1,97 +1,67 @@
 enum Lifecicle<singleton instanciation>;
 
-class BindStorage{...}
+role Bind[::Type = Any] is export {
+	has Any:U	$.type		= Type		;
+	has Str		$.named				;
+	has Lifecicle	$.lifecicle	= singleton	;
+	has 		$.instance			;
+	has Capture	$.capture	= \()		;
+	has Bool	$.done		= False		;
 
-role Binder[::Type = Mu, Callable :$instanciator] {
-
-	has Mu:U	$.type		is rw	= Type;
-	has Mu:U	$.to-type	is rw	= Type;
-	has Str		$.name		is rw;
-	has 		$.instance	is rw;
-	has Callable	$.instanciator	is rw	= $instanciator // -> $obj {$obj.to-type.new(|$obj.pos-args, |$obj.named-args)};
-	has Lifecicle	$.lifecicle	is rw	= singleton;
-	has		@.pos-args	is rw;
-	has		%.named-args	is rw;
-
-	method get-obj(Binder:D:) {
-		if not $!instance.defined {
-			$!instance = $!instanciator(self)
+	method get-obj {
+		do given $!lifecicle {
+			when singleton {
+				$!instance = self!instanciate without $!instance;
+				$!instance
+			}
+			default {
+				self!instanciate
+			}
 		}
-		my $instance = $!instance;
-		if $!lifecicle !~~ singleton {
-			undefine $!instance
+	}
+
+	method !instanciate {
+		do with $!capture -> $cap {
+			Type.new(|$cap)
+		} else {
+			Type.new
 		}
-		$instance
-	}
-
-	method match(Binder:D: Mu:U :$type = Mu, Str :$name){
-		$!type ~~ $type and $!name ~~ $name;
-	}
-
-	method named(Binder:D: Str:D $!name) {
-		self
-	}
-
-	method life-cicle(Binder:D: Lifecicle $!lifecicle) {
-		self
-	}
-
-	proto method to(Binder:D: |) {
-		{*};
-		BindStorage.add-obj(self);
-	}
-
-	multi method to(Binder:D: Callable $!instanciator, *@!pos-args, *%named-args) {
-		BindStorage.add-obj(self);
-	}
-
-	multi method to(Binder:D: Mu:U $!to-type, *@!pos-args, *%named-args) {
-		BindStorage.add-obj(self);
-	}
-
-	multi method to(Binder:D: Mu:D $!instance) {
-		BindStorage.add-obj(self);
 	}
 }
 
 class BindStorage {
-	my %binds{Mu:U};
+	my	::?CLASS	$instance		.= bless;
+	has			%!by-type{Any:U}		;
 
-	method dd {dd %binds}
+	method new{!!!}
 
-	method bind(Mu:U $type) {
-		Binder[$type].new;
+	method get-instance(::?CLASS:U:) {$instance}
+
+	method add-bind(Bind $bind) {
+		%!by-type{$bind.type}{$bind.named // ""}.unshift: $bind
 	}
 
-	method add-obj(Mu:D $obj) {
-		%binds{$obj.type}.push: $obj.name // "" => $obj;
-	}
-
-	method exists(Mu:U $type) {
-		%binds{$type}:exists
-	}
-
-	method get-obj(Mu:U :$type = Mu, Str :$name = "") {
-		my Mu:U @types;
-
-		for %binds.keys -> $t {
-			if $type === $t {
-				@types.unshift($t)
-			} elsif $type ~~ $t {
-				@types.push($t)
-			}
+	method find(Any:U $type, Str :$name) {
+		do with %!by-type{$type}{$name // ""} -> [$bind, *@] {
+			$bind	but True
+		} else {
+			Any	but False
 		}
-		if @types {
-			for @types -> $t {
-				note "%binds\{$t}\{$name}:exists";
-				if %binds{$t}{$name}:exists {
-					for @(%binds{$t}{$name}) -> Binder $bind {
-						my $obj = $bind.get-obj;
-						return $obj if $obj ~~ $type
-					}
-				}
-			}
-		}
-		$type.new
 	}
+}
+
+multi bind(Any:D $instance, Str :$named, Lifecicle :$lifecicle!) is export {
+	BindStorage.get-instance.add-bind: Bind[$instance.WHAT].new :$instance:$named:$lifecicle
+}
+
+multi bind(Any:U $type, Capture :$capture, Str :$named, Lifecicle :$lifecicle!) is export {
+	BindStorage.get-instance.add-bind: Bind[$type].new :$capture:$named:$lifecicle
+}
+
+multi bind(Any:D $instance, Str :$named) is export {
+	BindStorage.get-instance.add-bind: Bind[$instance.WHAT].new :$instance:$named
+}
+
+multi bind(Any:U $type, Capture :$capture, Str :$named) is export {
+	BindStorage.get-instance.add-bind: Bind[$type].new :$capture:$named
 }
