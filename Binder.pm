@@ -31,22 +31,35 @@ role Bind[::Type = Any] is export {
 
 class BindStorage {
 	my	::?CLASS	$instance		.= bless;
-	has			%!by-type{Any:U}		;
+	has			%!by-name			;
 
 	method new{!!!}
 
 	method get-instance(::?CLASS:U:) {$instance}
 
 	method add-bind(Bind $bind) {
-		%!by-type{$bind.type}{$bind.named // ""}.unshift: $bind
+		%!by-name{$bind.named // ""}.push: $bind
 	}
 
 	method find(Any:U $type, Str :$name) {
-		do with %!by-type{$type}{$name // ""} -> [$bind, *@] {
+		with %!by-name{$name // ""} -> @binds {
+			my @tmp;
+			for @binds -> $bind {
+				if $bind.type === $type {
+					@tmp.unshift: $bind
+				} elsif $bind.type ~~ $type {
+					@tmp.push: $bind
+				}
+			}
+			@tmp.first
+		}
+#`(
+		do with %!by-name{$name // ""}{$type} -> [$bind, *@] {
 			$bind	but True
 		} else {
 			Any	but False
 		}
+)
 	}
 }
 
