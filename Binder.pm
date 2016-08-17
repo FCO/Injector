@@ -41,25 +41,40 @@ class BindStorage {
 		%!by-name{$bind.named // ""}.push: $bind
 	}
 
-	method find(Any:U $type, Str :$name) {
-		with %!by-name{$name // ""} -> @binds {
+	method find(::Type, Str :$name) {
+		do with %!by-name{$name // ""} -> @binds {
 			my @tmp;
 			for @binds -> $bind {
-				if $bind.type === $type {
+				if $bind.type === Type {
 					@tmp.unshift: $bind
-				} elsif $bind.type ~~ $type {
+				} elsif $bind.type ~~ Type {
 					@tmp.push: $bind
 				}
 			}
-			@tmp.first
+			@tmp.first;
 		}
-#`(
-		do with %!by-name{$name // ""}{$type} -> [$bind, *@] {
-			$bind	but True
+	}
+
+	method get-obj(::OrigType, Str :$name) is hidden-from-backtrace {
+		my $type;
+		my $cast;
+		my $ret;
+		if OrigType.HOW ~~ Metamodel::CoercionHOW {
+			$type = OrigType.^constraint_type;
+			$cast = OrigType.^target_type;
 		} else {
-			Any	but False
+			$cast = $type = OrigType
 		}
-)
+		if $.find($type, :$name) -> Bind $bind {
+			$ret = $bind.get-obj
+		}
+		unless $cast === $type {
+			$ret = $ret.$cast;
+			CATCH {
+				die "Error converting '{$type.^name}' ({$ret}) to '{$cast.^name}'"
+			}
+		}
+		$ret
 	}
 }
 
