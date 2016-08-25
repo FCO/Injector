@@ -18,7 +18,7 @@ class BindStorage {
 		do with %!binds{$name}{Type.^name} -> Bind:D $bind {
 			$bind
 		} else {
-			my @poss = %!binds{$name}.values.grep(*.type ~~ Type);
+			my @poss = %!binds{$name}.values.grep: {.type ~~ Type};
 			do if @poss.elems == 0 {
 				fail "No bind found for type {Type.^name} and name $name";
 			} elsif @poss.elems > 1 {
