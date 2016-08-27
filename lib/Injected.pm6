@@ -1,5 +1,7 @@
 use BindStorage;
-role Injected[Str $name] {
+
+#| Role added on parameters that should be injected
+role Injected[Str $name #={injector name}] {
 	has Bind	$.injected;
 
 	method compose($obj) {
