@@ -2,4 +2,4 @@ use Injector::Bind;
 unit class Injector::Bind::Clone does Injector::Bind;
 
 method bind-type(::?CLASS:U:) {"clone"}
-method get-obj                {$!obj .= clone: |self!get-params}
+method get-obj                {$!obj .= clone}
