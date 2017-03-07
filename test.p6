@@ -16,10 +16,8 @@ class C1 {
     has Rand    $.r     is injected{:lifecycle<instance>};
 }
 
-BEGIN {
-    bind 42;
-    bind 13, :name<test>;
-}
+bind 42;
+bind 13, :name<test>;
 
 my C1 $c is injected;
 say $c;
