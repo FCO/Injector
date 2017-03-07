@@ -23,7 +23,7 @@ my C1 $c is injected;
 say $c;
 
 for ^3 {
-        given C1.new: :123b {
+    given C1.new: :123b {
         .c2.a.say;
         .b.say;
         .r.say;
