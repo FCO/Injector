@@ -58,5 +58,5 @@ class ByType {
     }
 
     method child {
-        % = %!by-name.kv.map: -> $k, $v { $k => $v.child }
+        self.clone: :by-name(%!by-name.kv.map: -> $k, $v { $k => $v.child })
     }

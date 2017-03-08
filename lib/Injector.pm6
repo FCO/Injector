@@ -98,7 +98,7 @@ multi bind(
     }
 }
 
-sub bind-child {
+sub bind-child is export {
     $storage .= child
 }
 
