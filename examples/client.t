@@ -14,4 +14,4 @@ class TestService does Service {
 bind-child;
 bind TestService, :to(Service);
 
-is Client.new.greet, "Hello TESTING", ｢The injector is working \o/｣
+is Client.new.greet, ｢Hello TESTING｣, ｢The injector is working \o/｣
