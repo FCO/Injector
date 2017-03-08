@@ -70,10 +70,6 @@ multi trait_mod:<is>(
 	)
 ) {
     my $bind = %lifecycle{$lifecycle}.new: :type($v.var.WHAT), :$name, :$capture;
-    #$v.var := Proxy.new:
-	#	FETCH => { say "fetching!!!"; $bind.get-obj },
-	#	STORE => -> $value { $bind.add-obj: $value },
-	#;
     $v.block.add_phaser("ENTER", {
         #note "Inject on variable {$v.name} of type {$v.var.^name}";
         $v.var = $bind.get-obj without $v.var;
