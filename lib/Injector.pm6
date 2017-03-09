@@ -87,8 +87,3 @@ multi bind(
 ) is export {
 	die "Bind not found for name '$name' and type {$to.^name}" unless $storage.add-obj: $obj, :type($to), :$name;
 }
-
-sub bind-child is export {
-    $storage .= child
-}
-
