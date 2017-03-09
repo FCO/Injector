@@ -4,7 +4,8 @@ use Injector::Bind;
 use Injector::Bind::Singleton;
 use Injector::Bind::Instance;
 use Injector::Bind::Clone;
-use Injector::Injected;
+use Injector::Injected::Attribute;
+use Injector::Injected::Variable;
 
 my %lifecycle = $*REPO
 	.repo-chain
@@ -33,26 +34,10 @@ multi trait_mod:<is>(
 		Str:D   :$lifecycle where %lifecycle.keys.any   = "singleton"
 	)
 ) is export {
-	$attr does Injector::Injected;
-
-	my $bind = %lifecycle{$lifecycle}.new: :type($attr.type), :$name, :$capture;
-
-	$storage.add: $bind;
-	$attr.injected-bind = $bind;
-
-    if not $attr.package.^find_method("inject-attributes") {
-        $attr.package.^add_method("inject-attributes", method {
-            for self.^attributes.grep: Injector::Injected -> $attr {
-                #note "Inject on attribute {$attr.name} of type {$attr.type.^name}";
-                $attr.set_value: self, $attr.injected-bind.get-obj without $attr.get_value: self
-            }
-        });
-        if $attr.package.^find_method("TWEAK") -> &tweak {
-            &tweak.wrap: method (|) { self.inject-attributes; nextsame }
-        } else {
-            $attr.package.^add_method("TWEAK", method (|) {self.inject-attributes})
-        }
-    }
+	$attr does Injector::Injected::Attribute;
+    my $bind = %lifecycle{$lifecycle}.new: :type($attr.type), :$name, :$capture;
+    $storage.add: $bind;
+    $attr.prepare-inject: $bind
 }
 
 multi trait_mod:<is>(Variable:D $v, Bool :$injected!) {
@@ -69,11 +54,10 @@ multi trait_mod:<is>(
 		Str:D   :$lifecycle where %lifecycle.keys.any   = "singleton"
 	)
 ) {
+	$v does Injector::Injected::Variable;
     my $bind = %lifecycle{$lifecycle}.new: :type($v.var.WHAT), :$name, :$capture;
-    $v.block.add_phaser("ENTER", {
-        #note "Inject on variable {$v.name} of type {$v.var.^name}";
-        $v.var = $bind.get-obj without $v.var;
-    })
+    $storage.add: $bind;
+    $v.prepare-inject: $bind
 }
 
 sub note-storage is export {note $storage.gist}

@@ -1,5 +1,4 @@
 unit role Injector::Bind;
-use Injector::Injected;
 
 has         $.type              ;
 has Str     $.name     = ""     ;
