@@ -16,13 +16,13 @@ class C1 {
     has Rand    $.r     is injected{:lifecycle<instance>};
 }
 
-BEGIN {
+#BEGIN {
     bind 42;
     bind 13, :name<test>;
-}
+#}
 
-my C1 $c is injected;
-say $c;                     # C1.new(c2 => C2.new(a => 42), b => 13, r => Rand.new(r => "qo"))
+#my C1 $c is injected;
+#say $c;                     # C1.new(c2 => C2.new(a => 42), b => 13, r => Rand.new(r => "qo"))
 
 for ^3 {
     given C1.new: :123b {

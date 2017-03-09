@@ -80,18 +80,12 @@ sub note-storage is export {note $storage.gist}
 
 multi bind(Mu $obj, *%pars) is export { bind :$obj, |%pars }
 multi bind(
-    Mu      :$obj!                                                  ,
-    Mu:U    :$to                                    = $obj.WHAT     ,
-    Str     :$name                                  = ""            ,
+    Mu      :$obj!                     ,
+    Mu:U    :$to       = $obj.WHAT     ,
+    Str     :$name     = ""            ,
     Capture :$capture
 ) is export {
-	my $bind = $storage.find($to, :$name);
-    with $bind {
-        .add-obj($obj);
-        $storage.add: $bind
-    } else {
-        note "Bind not found for name '$name' and type {$to.^name}"
-    }
+	die "Bind not found for name '$name' and type {$to.^name}" unless $storage.add-obj: $obj, :type($to), :$name;
 }
 
 sub bind-child is export {

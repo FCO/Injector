@@ -11,7 +11,6 @@ class TestService does Service {
 	has $.name = "TESTING";
 }
 
-bind-child;
 bind TestService, :to(Service);
 
 is Client.new.greet, ｢Hello TESTING｣, ｢The injector is working \o/｣
