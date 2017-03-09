@@ -8,33 +8,33 @@ use Injector::Injected::Attribute;
 use Injector::Injected::Variable;
 
 my %lifecycle = $*REPO
-	.repo-chain
-	.flatmap(*.loaded)
-	.map({::(.Str)})
-	.grep({
-		.^name
-		.starts-with("Injector::Bind::")
-	})
-	.map({.bind-type => $_})
+    .repo-chain
+    .flatmap(*.loaded)
+    .map({::(.Str)})
+    .grep({
+        .^name
+        .starts-with("Injector::Bind::")
+    })
+    .map({.bind-type => $_})
 ;
 
 my Injector::Storage $storage .= new;
 
 multi trait_mod:<is>(Attribute:D $attr, Bool :$injected!) is export {
-	trait_mod:<is>($attr, :injected{});
+    trait_mod:<is>($attr, :injected{});
 }
 multi trait_mod:<is>(Attribute:D $attr, Str :$injected!) is export {
     trait_mod:<is>($attr, :injected{:name($injected)});
 }
 multi trait_mod:<is>(
-	Attribute:D $attr,
-	:%injected! (
-		Str:D   :$name                                  = ""            ,
-		Capture :$capture                               = \()           ,
-		Str:D   :$lifecycle where %lifecycle.keys.any   = "singleton"
-	)
+    Attribute:D $attr,
+    :%injected! (
+        Str:D   :$name                                  = ""            ,
+        Capture :$capture                               = \()           ,
+        Str:D   :$lifecycle where %lifecycle.keys.any   = "singleton"
+    )
 ) is export {
-	$attr does Injector::Injected::Attribute;
+    $attr does Injector::Injected::Attribute;
     my $bind = %lifecycle{$lifecycle}.new: :type($attr.type), :$name, :$capture;
     $storage.add: $bind;
     $attr.prepare-inject: $bind
@@ -48,13 +48,13 @@ multi trait_mod:<is>(Variable:D $v, Str :$injected!) {
 }
 multi trait_mod:<is>(
     Variable:D $v,
-	:%injected! (
-		Str:D   :$name                                  = ""            ,
-		Capture :$capture                               = \()           ,
-		Str:D   :$lifecycle where %lifecycle.keys.any   = "singleton"
-	)
+    :%injected! (
+        Str:D   :$name                                  = ""            ,
+        Capture :$capture                               = \()           ,
+        Str:D   :$lifecycle where %lifecycle.keys.any   = "singleton"
+    )
 ) {
-	$v does Injector::Injected::Variable;
+    $v does Injector::Injected::Variable;
     my $bind = %lifecycle{$lifecycle}.new: :type($v.var.WHAT), :$name, :$capture;
     $storage.add: $bind;
     $v.prepare-inject: $bind
@@ -69,5 +69,5 @@ multi bind(
     Str     :$name     = ""            ,
     Capture :$capture
 ) is export {
-	die "Bind not found for name '$name' and type {$to.^name}" unless $storage.add-obj: $obj, :type($to), :$name;
+    die "Bind not found for name '$name' and type {$to.^name}" unless $storage.add-obj: $obj, :type($to), :$name;
 }
