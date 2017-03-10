@@ -20,7 +20,7 @@ method add-obj($obj, :$type = $obj.WHAT, :$name = "", :$override = False) {
 	my @binds = |$.find($type, :$name);
 	die "No bind found" unless @binds;
 	for @binds {
-		.add-obj: $obj
+		.add-obj: $obj;
 	}
 	?@binds
 }
