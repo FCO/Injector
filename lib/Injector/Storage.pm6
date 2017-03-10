@@ -4,7 +4,7 @@ use Injector::Bind;
 
 has %!bind{Str:D; Str:D; Str:D};
 
-sub name(Mu:U $_) { S/ <!after ':'> ':' <[UD_]> // given .^name }
+sub name(Mu:U $_) { S/ <!after ':'> ':' <[UD_]> $// given .^name }
 
 method add(Injector::Bind:D $bind) {
 	%!bind{$bind.name.perl; $bind.type.&name; $bind.bind-type} = $bind;
