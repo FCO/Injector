@@ -54,7 +54,7 @@ multi trait_mod:<is>(
     )
 ) is export {
     $attr does Injector::Injected::Attribute;
-    create-bind $attr, :type($attr.type), :$name, :$capture, :$lifecycle;
+    create-bind $attr, :type($attr.type), |%injected
 }
 
 multi trait_mod:<is>(Variable:D $v, Bool :$injected!) {
@@ -72,7 +72,7 @@ multi trait_mod:<is>(
     )
 ) {
     $v does Injector::Injected::Variable;
-    create-bind $v, :type($v.var.WHAT), :$name, :$capture, :$lifecycle;
+    create-bind $v, :type($v.var.WHAT), |%injected
 }
 
 sub note-storage is export {note $storage.gist}

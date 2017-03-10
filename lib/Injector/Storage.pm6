@@ -16,7 +16,7 @@ method find(::?CLASS:D: Mu:U $type, Str :$name = "") {
 		‼ Empty
 }
 
-method add-obj($obj, :$type = $obj.WHAT, :$name = "", :$override = False) {
+method add-obj($obj, :$type = $obj.WHAT, :$name = "", :$override) {
 	my @binds = |$.find($type, :$name);
 	die "No bind found" unless @binds;
 	for @binds {
