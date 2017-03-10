@@ -22,11 +22,14 @@ my Injector::Storage $storage .= new;
 
 sub create-bind(
 	$var,
-	Str:D   :$name                                  = ""            ,
-	Mu:U    :$type                                                  ,
-	Capture :$capture                               = \()           ,
-	Str:D   :$lifecycle where %lifecycle.keys.any   = "singleton"
+	Str:D   :$name      = ""            ,
+	Mu:U    :$type                      ,
+	Capture :$capture   = \()           ,
+	Str:D   :$lifecycle = "singleton"
 ) {
+	if $lifecycle and not %lifecycle{$lifecycle}:exists {
+		die "Unknow lifecycle {$lifecycle}"
+	}
     my $bind = %lifecycle{$lifecycle}.new: :$type, :$name, :$capture;
     $storage.add: $bind;
     $var.prepare-inject: $bind
@@ -41,9 +44,9 @@ multi trait_mod:<is>(Attribute:D $attr, Str :$injected!) is export {
 multi trait_mod:<is>(
     Attribute:D $attr,
     :%injected! (
-        Str:D   :$name                                  = ""            ,
-        Capture :$capture                               = \()           ,
-        Str:D   :$lifecycle where %lifecycle.keys.any   = "singleton"
+        Str:D   :$name       = ""            ,
+        Capture :$capture    = \()           ,
+        Str:D   :$lifecycle  = "singleton"
     )
 ) is export {
     $attr does Injector::Injected::Attribute;
@@ -59,9 +62,9 @@ multi trait_mod:<is>(Variable:D $v, Str :$injected!) {
 multi trait_mod:<is>(
     Variable:D $v,
     :%injected! (
-        Str:D   :$name                                  = ""            ,
-        Capture :$capture                               = \()           ,
-        Str:D   :$lifecycle where %lifecycle.keys.any   = "singleton"
+        Str:D   :$name      = ""            ,
+        Capture :$capture   = \()           ,
+        Str:D   :$lifecycle = "singleton"
     )
 ) {
     $v does Injector::Injected::Variable;
