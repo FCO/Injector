@@ -24,16 +24,16 @@ my Injector::Storage $storage .= new;
 sub undefined(Mu:U $type) { so / <!after ':'> ':U' $/ given $type.^name }
 
 sub create-bind(
-	$var,
-	Str:D   :$name      = ""            ,
-	Mu:U    :$type                      ,
-	Capture :$capture   = \()           ,
-	Str     :$lifecycle is copy;
+    $var,
+    Str:D   :$name      = ""            ,
+    Mu:U    :$type                      ,
+    Capture :$capture   = \()           ,
+    Str     :$lifecycle is copy;
 ) {
-	if $lifecycle and not %lifecycle{$lifecycle}:exists {
-		die "Unknow lifecycle '{$lifecycle}'"
-	}
-	$lifecycle //= undefined($type) ⁇ "object-type" ‼ "singleton";
+    if $lifecycle and not %lifecycle{$lifecycle}:exists {
+        die "Unknow lifecycle '{$lifecycle}'"
+    }
+    $lifecycle //= undefined($type) ⁇ "object-type" ‼ "singleton";
     my Injector::Bind $bind = %lifecycle{$lifecycle}.new: :$type, :$name, :$capture;
     $storage.add: $bind;
     $var.prepare-inject: $bind
