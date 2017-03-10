@@ -20,6 +20,18 @@ my %lifecycle = $*REPO
 
 my Injector::Storage $storage .= new;
 
+sub create-bind(
+	$var,
+	Str:D   :$name                                  = ""            ,
+	Mu:U    :$type                                                  ,
+	Capture :$capture                               = \()           ,
+	Str:D   :$lifecycle where %lifecycle.keys.any   = "singleton"
+) {
+    my $bind = %lifecycle{$lifecycle}.new: :$type, :$name, :$capture;
+    $storage.add: $bind;
+    $var.prepare-inject: $bind
+}
+
 multi trait_mod:<is>(Attribute:D $attr, Bool :$injected!) is export {
     trait_mod:<is>($attr, :injected{});
 }
@@ -35,9 +47,7 @@ multi trait_mod:<is>(
     )
 ) is export {
     $attr does Injector::Injected::Attribute;
-    my $bind = %lifecycle{$lifecycle}.new: :type($attr.type), :$name, :$capture;
-    $storage.add: $bind;
-    $attr.prepare-inject: $bind
+    create-bind $attr, :type($attr.type), :$name, :$capture, :$lifecycle;
 }
 
 multi trait_mod:<is>(Variable:D $v, Bool :$injected!) {
@@ -55,9 +65,7 @@ multi trait_mod:<is>(
     )
 ) {
     $v does Injector::Injected::Variable;
-    my $bind = %lifecycle{$lifecycle}.new: :type($v.var.WHAT), :$name, :$capture;
-    $storage.add: $bind;
-    $v.prepare-inject: $bind
+    create-bind $v, :type($v.var.WHAT), :$name, :$capture, :$lifecycle;
 }
 
 sub note-storage is export {note $storage.gist}
