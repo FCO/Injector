@@ -11,6 +11,6 @@ class TestService does Service {
 	has $.name = "TESTING";
 }
 
-bind TestService, :to(Service);
+bind TestService, :to(Service), :override;
 
 is Client.new.greet, ｢Hello TESTING｣, ｢The injector is working \o/｣

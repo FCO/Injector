@@ -82,7 +82,9 @@ multi bind(
     Mu      :$obj!                     ,
     Mu:U    :$to       = $obj.WHAT     ,
     Str     :$name     = ""            ,
-    Capture :$capture
+    Capture :$capture                  ,
+	Bool    :$override
 ) is export {
-    die "Bind not found for name '$name' and type {$to.^name}" unless $storage.add-obj: $obj, :type($to), :$name;
+    die "Bind not found for name '$name' and type {$to.^name}"
+		unless $storage.add-obj: $obj, :type($to), :$name, :$override;
 }
