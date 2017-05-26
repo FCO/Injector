@@ -33,7 +33,7 @@ sub create-bind(
     if $lifecycle and not %lifecycle{$lifecycle}:exists {
         die "Unknow lifecycle '{$lifecycle}'"
     }
-    $lifecycle //= undefined($type) ⁇ "object-type" ‼ "singleton";
+    $lifecycle //= undefined($type) ?? "object-type" !! "singleton";
     my Injector::Bind $bind = %lifecycle{$lifecycle}.new: :$type, :$name, :$capture;
     $storage.add: $bind;
     $var.prepare-inject: $bind

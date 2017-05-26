@@ -12,8 +12,8 @@ method add(Injector::Bind:D $bind) {
 
 method find(::?CLASS:D: Mu:U $type, Str :$name = "") {
 	%!bind{$name.perl; $type.&name}:exists
-		⁇ |%!bind{$name.perl; $type.&name}.first.values
-		‼ Empty
+		?? |%!bind{$name.perl; $type.&name}.first.values
+		!! Empty
 }
 
 method add-obj($obj, :$type = $obj.WHAT, :$name = "", :$override) {
