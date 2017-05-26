@@ -22,7 +22,7 @@ class C1 {
 BEGIN {
     bind 42                  ;
     bind 13,      :name<test>;
-	bind RandStr, :to(Rand)  ;
+    bind RandStr, :to(Rand)  ;
 }
 
 my C1 $c is injected;
