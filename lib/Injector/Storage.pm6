@@ -1,4 +1,4 @@
-no precompilation;
+#no precompilation;
 unit class Injector::Storage;
 use Injector::Bind;
 
