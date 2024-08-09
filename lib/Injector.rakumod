@@ -25,10 +25,10 @@ sub undefined(Mu:U $type) { so / <!after ':'> ':U' $/ given $type.^name }
 
 sub create-bind(
     $var,
-    Str:D   :$name      = ""            ,
-    Mu:U    :$type                      ,
-    Capture :$capture   = \()           ,
-    Str     :$lifecycle is copy;
+    Str:D   :$name      = ""   ,
+    Mu:U    :$type             ,
+    Capture :$capture   = \()  ,
+    Str     :$lifecycle is copy,
 ) {
     if $lifecycle and not %lifecycle{$lifecycle}:exists {
         die "Unknow lifecycle '{$lifecycle}'"
@@ -50,7 +50,7 @@ multi trait_mod:<is>(
     :%injected! (
         Str:D   :$name       = ""  ,
         Capture :$capture    = \() ,
-        Str     :$lifecycle
+        Str     :$lifecycle        ,
     )
 ) is export {
     $attr does Injector::Injected::Attribute;
@@ -66,9 +66,9 @@ multi trait_mod:<is>(Variable:D $v, Str :$injected!) {
 multi trait_mod:<is>(
     Variable:D $v,
     :%injected! (
-        Str:D   :$name      = ""            ,
-        Capture :$capture   = \()           ,
-        Str     :$lifecycle
+        Str:D   :$name      = "" ,
+        Capture :$capture   = \(),
+        Str     :$lifecycle      ,
     )
 ) {
     $v does Injector::Injected::Variable;
@@ -79,12 +79,59 @@ sub note-storage is export {note $storage.gist}
 
 multi bind(Mu $obj, *%pars) is export { bind :$obj, |%pars }
 multi bind(
-    Mu      :$obj!                     ,
-    Mu:U    :$to       = $obj.WHAT     ,
-    Str     :$name     = ""            ,
-    Capture :$capture                  ,
-	Bool    :$override
+    Mu      :$obj!                ,
+    Mu:U    :$to       = $obj.WHAT,
+    Str     :$name     = ""       ,
+    Capture :$capture             ,
+    Bool    :$override            ,
 ) is export {
     die "Bind not found for name '$name' and type {$to.^name}"
-		unless $storage.add-obj: $obj, :type($to), :$name, :$override;
+        unless $storage.add-obj: $obj, :type($to), :$name, :$override;
 }
+
+=begin pod
+
+=head1 Injector
+
+A perl6 dependency injector
+
+=head2 Synopsys
+
+=begin code :lang<raku>
+use lib "lib";
+
+use Injector;
+
+class Rand {
+    has $.r = ("a" .. "z").roll(rand * 10).join;
+}
+
+class C2 {
+    has Int $.a is injected
+}
+
+class C1 {
+    has C2      $.c2    is injected;
+    has Int     $.b     is injected<test>;
+    has Rand    $.r     is injected{:lifecycle<instance>};
+}
+
+BEGIN {
+    bind 42;
+    bind 13, :name<test>;
+}
+
+my C1 $c is injected;
+say $c;                     # C1.new(c2 => C2.new(a => 42), b => 13, r => Rand.new(r => "qo"))
+
+for ^3 {
+    given C1.new: :123b {
+        .c2.a.say;          # 42                            42                          42
+        .b.say;             # 123                           123                         123
+        .r.say;             # Rand.new(r => "ztjbpvqka")    Rand.new(r => "zsmqnrr")    Rand.new(r => "wmsq")
+    }
+}
+
+=end code
+
+=end pod
