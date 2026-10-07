@@ -2,7 +2,7 @@
 unit class Injector::Storage;
 use Injector::Bind;
 
-has %!bind{Str:D; Str:D; Str:D};
+has %!bind;
 
 sub name(Mu:U $_) { S/ <!after ':'> ':' <[UD_]> $// given .^name }
 
