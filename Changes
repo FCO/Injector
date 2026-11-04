@@ -1,6 +1,8 @@
 Revision history for Injector
 
 {{$NEXT}}
+
+0.0.2  2026-11-04T03:56:41Z
     - Don't declare a shaped hash for the bind storage
 
 0.0.1  2024-08-09T01:39:06+01:00
