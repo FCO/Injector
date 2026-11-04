@@ -2,6 +2,9 @@ Revision history for Injector
 
 {{$NEXT}}
 
+0.0.3  2026-11-04T03:58:41Z
+    - remove deprecated perl method
+
 0.0.2  2026-11-04T03:56:41Z
     - Don't declare a shaped hash for the bind storage
 
